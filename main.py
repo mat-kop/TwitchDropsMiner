@@ -8,6 +8,7 @@ if __name__ == "__main__":
     freeze_support()
     import io
     import sys
+    import ctypes
     import signal
     import asyncio
     import logging
@@ -88,6 +89,20 @@ if __name__ == "__main__":
             elif self._verbose >= 4:
                 return logging.INFO
             return logging.NOTSET
+
+    # Enable DPI awareness on Windows before creating any window so that
+    # the OS reports the physical DPI and does not bitmap-scale the app.
+    if sys.platform == "win32":
+        PROCESS_PER_MONITOR_DPI_AWARE = 2
+        try:
+            # Windows 8.1+: per-monitor DPI awareness
+            ctypes.windll.shcore.SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE)
+        except Exception:
+            try:
+                # Windows Vista+: system DPI awareness (fallback)
+                ctypes.windll.user32.SetProcessDPIAware()
+            except Exception:
+                pass
 
     # handle input parameters
     # NOTE: parser output is shown via message box
