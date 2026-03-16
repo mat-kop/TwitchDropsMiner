@@ -2169,6 +2169,14 @@ class GUIManager:
         self._poll_task: asyncio.Task[NoReturn] | None = None
         self._close_requested = asyncio.Event()
         self._root = root = Tk(className=WINDOW_TITLE)
+        # Set DPI-aware scaling so that all widgets render at the correct size
+        # on high-DPI displays (4K, HiDPI, Retina, etc.) on any platform.
+        try:
+            _TK_BASELINE_DPI = 72.0  # Tk's internal reference DPI (points per inch)
+            dpi = root.winfo_fpixels('1i')  # physical pixels per inch
+            root.tk.call('tk', 'scaling', dpi / _TK_BASELINE_DPI)
+        except Exception:
+            pass
         # withdraw immediately to prevent the window from flashing
         self._root.withdraw()
         # root.resizable(False, True)
